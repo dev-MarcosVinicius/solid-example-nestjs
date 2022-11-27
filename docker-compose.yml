@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_DB: db
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - solid-example
+
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    volumes:
+      - .:/usr/src/app
+    env_file:
+    - env/local.env
+    command: npm run start:dev
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+    networks:
+      - solid-example
+
+networks:
+  solid-example:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
